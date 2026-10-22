@@ -780,7 +780,7 @@ static int sof_es8336_probe(struct platform_device *pdev)
 	if (IS_ERR(priv->gpio_headphone)) {
 		ret = dev_err_probe(dev, PTR_ERR(priv->gpio_headphone),
 				    "could not get headphone-enable GPIO\n");
-		goto err_put_codec;
+		goto err_put_speakers;
 	}
 
 	/* Both active-low descriptors follow speaker power on this board. */
@@ -801,13 +801,17 @@ static int sof_es8336_probe(struct platform_device *pdev)
 
 	ret = devm_snd_soc_register_card(dev, card);
 	if (ret) {
-		gpiod_put(priv->gpio_speakers);
 		dev_err(dev, "snd_soc_register_card failed: %d\n", ret);
-		goto err_put_codec;
+		goto err_put_headphone;
 	}
 	platform_set_drvdata(pdev, &sof_es8336_card);
 	return 0;
 
+err_put_headphone:
+	cancel_delayed_work_sync(&priv->pcm_pop_work);
+	gpiod_put(priv->gpio_headphone);
+err_put_speakers:
+	gpiod_put(priv->gpio_speakers);
 err_put_codec:
 	device_remove_software_node(priv->codec_dev);
 	put_device(codec_dev);
@@ -820,6 +824,7 @@ static void sof_es8336_remove(struct platform_device *pdev)
 	struct sof_es8336_private *priv = snd_soc_card_get_drvdata(card);
 
 	cancel_delayed_work_sync(&priv->pcm_pop_work);
+	gpiod_put(priv->gpio_headphone);
 	gpiod_put(priv->gpio_speakers);
 	device_remove_software_node(priv->codec_dev);
 	put_device(priv->codec_dev);

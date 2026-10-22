@@ -6,4 +6,4 @@
 #include "sof_es8336_legacy.c"
 #endif
 
-MODULE_VERSION("1.1.0-research");
+MODULE_VERSION("1.1.1-research");

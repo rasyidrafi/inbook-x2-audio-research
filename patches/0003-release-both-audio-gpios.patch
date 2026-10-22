@@ -1,0 +1,52 @@
+Subject: [PATCH] ASoC: Intel: sof_es8336: release both GPIO descriptors on teardown
+
+The secondary GPIO was requested without a matching put on remove.
+Unloading and reloading the two-GPIO driver left headphone-enable busy
+and prevented sound card registration. Release both descriptors on
+remove and unwind probe failures in reverse acquisition order. Cancel
+initialized GPIO work before releasing descriptors on registration failure.
+Reproduced during local hardware testing of the v7.3-based candidate.
+
+Research candidate; not submitted or hardware-qualified as a new release.
+
+---
+diff --git a/sound/soc/intel/boards/sof_es8336.c b/sound/soc/intel/boards/sof_es8336.c
+--- a/sound/soc/intel/boards/sof_es8336.c
++++ b/sound/soc/intel/boards/sof_es8336.c
+@@ -780,7 +780,7 @@
+ 	if (IS_ERR(priv->gpio_headphone)) {
+ 		ret = dev_err_probe(dev, PTR_ERR(priv->gpio_headphone),
+ 				    "could not get headphone-enable GPIO\n");
+-		goto err_put_codec;
++		goto err_put_speakers;
+ 	}
+ 
+ 	/* Both active-low descriptors follow speaker power on this board. */
+@@ -801,13 +801,17 @@
+ 
+ 	ret = devm_snd_soc_register_card(dev, card);
+ 	if (ret) {
+-		gpiod_put(priv->gpio_speakers);
+ 		dev_err(dev, "snd_soc_register_card failed: %d\n", ret);
+-		goto err_put_codec;
++		goto err_put_headphone;
+ 	}
+ 	platform_set_drvdata(pdev, &sof_es8336_card);
+ 	return 0;
+ 
++err_put_headphone:
++	cancel_delayed_work_sync(&priv->pcm_pop_work);
++	gpiod_put(priv->gpio_headphone);
++err_put_speakers:
++	gpiod_put(priv->gpio_speakers);
+ err_put_codec:
+ 	device_remove_software_node(priv->codec_dev);
+ 	put_device(codec_dev);
+@@ -820,6 +824,7 @@
+ 	struct sof_es8336_private *priv = snd_soc_card_get_drvdata(card);
+ 
+ 	cancel_delayed_work_sync(&priv->pcm_pop_work);
++	gpiod_put(priv->gpio_headphone);
+ 	gpiod_put(priv->gpio_speakers);
+ 	device_remove_software_node(priv->codec_dev);
+ 	put_device(priv->codec_dev);

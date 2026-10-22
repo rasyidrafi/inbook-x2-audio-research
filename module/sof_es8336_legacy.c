@@ -792,17 +792,17 @@ static int sof_es8336_probe(struct platform_device *pdev)
 
 	ret = devm_snd_soc_register_card(dev, card);
 	if (ret) {
-		gpiod_put(priv->gpio_headphone);
-		gpiod_put(priv->gpio_speakers);
 		dev_err(dev, "snd_soc_register_card failed: %d\n", ret);
-		goto err_put_codec;
+		goto err_put_headphone;
 	}
 	platform_set_drvdata(pdev, &sof_es8336_card);
 	return 0;
 
+err_put_headphone:
+	cancel_delayed_work_sync(&priv->pcm_pop_work);
+	gpiod_put(priv->gpio_headphone);
 err_put_speakers:
-	if (IS_ERR(priv->gpio_headphone))
-		gpiod_put(priv->gpio_speakers);
+	gpiod_put(priv->gpio_speakers);
 err_put_codec:
 	device_remove_software_node(priv->codec_dev);
 	put_device(codec_dev);

@@ -1,5 +1,10 @@
 # Reproduksi dan pengujian
 
+**Status update:** live hardware qualification failed. See
+[hardware test report](hardware-test-20261022.md). Do not install or hot-reload
+the candidates on a working machine. Instructions below describe the earlier
+research workflow, not an approved deployment procedure.
+
 ## Build dan pengujian tanpa mengubah audio laptop
 
 Semua kompilasi berikut dijalankan **di build-host**, di direktori proyek.

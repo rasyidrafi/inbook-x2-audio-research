@@ -1,5 +1,11 @@
 # Infinix INBOOK X2 — ES8326 research and Linux patch candidate
 
+**Hardware qualification FAILED. Do not install the candidates permanently.**
+Live testing found a GPIO teardown leak and a subsequent topology reload kernel
+Oops. See [the hardware test report](docs/hardware-test-20261022.md). The source
+is now the unqualified 1.1.1 research revision; earlier build results below
+refer to 1.1.0 and are not proof of hardware safety.
+
 Hasil pekerjaan: reverse engineering statis driver Windows, dua patch kernel
 Linux, source modul DKMS kandidat **1.1.0**, alat analisis yang bisa dijalankan
 ulang, dan pengujian transisi driver. Build/dekompilasi dilakukan di `build-host`.

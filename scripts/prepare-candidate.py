@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a reviewable two-patch series and a dual-kernel DKMS candidate."""
+"""Generate a three-patch research series; hardware qualification has failed."""
 from pathlib import Path
 import difflib
 import shutil
@@ -58,6 +58,47 @@ def restart(source: str) -> str:
         "\t\t\t\t\t   msecs_to_jiffies(70));\n\t\tbreak;")
 
 
+def cleanup(source: str) -> str:
+    start = source.index('\tif (IS_ERR(priv->gpio_headphone))')
+    end = source.index('\n\t}', start) + len('\n\t}')
+    block = source[start:end].replace('goto err_put_codec;', 'goto err_put_speakers;')
+    source = source[:start] + block + source[end:]
+    start = source.index('\tret = devm_snd_soc_register_card(dev, card);')
+    end = source.index('static const struct platform_device_id board_ids[]', start)
+    return source[:start] + '''	ret = devm_snd_soc_register_card(dev, card);
+	if (ret) {
+		dev_err(dev, "snd_soc_register_card failed: %d\\n", ret);
+		goto err_put_headphone;
+	}
+	platform_set_drvdata(pdev, &sof_es8336_card);
+	return 0;
+
+err_put_headphone:
+	cancel_delayed_work_sync(&priv->pcm_pop_work);
+	gpiod_put(priv->gpio_headphone);
+err_put_speakers:
+	gpiod_put(priv->gpio_speakers);
+err_put_codec:
+	device_remove_software_node(priv->codec_dev);
+	put_device(codec_dev);
+	return ret;
+}
+
+static void sof_es8336_remove(struct platform_device *pdev)
+{
+	struct snd_soc_card *card = platform_get_drvdata(pdev);
+	struct sof_es8336_private *priv = snd_soc_card_get_drvdata(card);
+
+	cancel_delayed_work_sync(&priv->pcm_pop_work);
+	gpiod_put(priv->gpio_headphone);
+	gpiod_put(priv->gpio_speakers);
+	device_remove_software_node(priv->codec_dev);
+	put_device(priv->codec_dev);
+}
+
+''' + source[end:]
+
+
 def patch(name: str, subject: str, body: str, before: str, after: str) -> None:
     diff = ''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
                                        fromfile="a/" + TARGET, tofile="b/" + TARGET))
@@ -70,7 +111,8 @@ def patch(name: str, subject: str, body: str, before: str, after: str) -> None:
 def main() -> None:
     upstream = (ROOT / "inputs/linux-upstream/sof_es8336.c").read_text()
     first = board_gpio(upstream)
-    final = restart(first)
+    second = restart(first)
+    final = cleanup(second)
     patch("0001-inbook-x2-board-gpio.patch",
           "ASoC: Intel: sof_es8336: add Infinix EM_IC325 GPIO configuration",
           "Select both GPIOs for the exact Infinix board and make the secondary\n"
@@ -87,26 +129,36 @@ def main() -> None:
           "board; capture and other boards are unchanged. This ports the previously\n"
           "hardware-tested local 1.0.1 fix to the pinned upstream source.\n"
           "Link: https://github.com/thesofproject/linux/issues/5967",
-          first, final)
+          first, second)
+    patch("0003-release-both-audio-gpios.patch",
+          "ASoC: Intel: sof_es8336: release both GPIO descriptors on teardown",
+          "The secondary GPIO was requested without a matching put on remove.\n"
+          "Unloading and reloading the two-GPIO driver left headphone-enable busy\n"
+          "and prevented sound card registration. Release both descriptors on\n"
+          "remove and unwind probe failures in reverse acquisition order. Cancel\n"
+          "initialized GPIO work before releasing descriptors on registration failure.\n"
+          "Reproduced during local hardware testing of the v7.3-based candidate.",
+          second, final)
     module = ROOT / "module"
     module.mkdir(exist_ok=True)
     (module / "sof_es8336_modern.c").write_text(final)
     # Keep the already-built 6.18 compatibility implementation, adding autodetection.
     legacy = (ROOT / "inputs/linux-current/sof_es8336_legacy.c").read_text()
-    legacy = detect_board(legacy)
+    legacy = cleanup(detect_board(legacy))
     legacy = replace_once(legacy, 'MODULE_VERSION("1.0.1-infinix");', '')
     legacy = legacy.replace("Infinix ES8326 GPIO correction 1.0.1 enabled",
                             "Infinix ES8326 research GPIO correction enabled")
     (module / "sof_es8336_legacy.c").write_text(legacy)
     shutil.copy2(ROOT / "inputs/linux-current/hdac_hda.h", module)
     wrapper = (ROOT / "inputs/linux-current/sof_es8336.c").read_text()
-    (module / "sof_es8336.c").write_text(wrapper + '\nMODULE_VERSION("1.1.0-research");\n')
+    (module / "sof_es8336.c").write_text(wrapper + '\nMODULE_VERSION("1.1.1-research");\n')
     common = (ROOT / "inputs/linux-upstream/hda_dsp_common.h").read_text()
     common = replace_once(common, '"../../codecs/hdac_hda.h"', '"hdac_hda.h"')
     (module / "hda_dsp_common.h").write_text(common)
     (ROOT / "patches/series").write_text(
-        "0001-inbook-x2-board-gpio.patch\n0002-inbook-x2-playback-restart.patch\n")
-    print("Generated two patches and module sources; no live system changes.")
+        "0001-inbook-x2-board-gpio.patch\n0002-inbook-x2-playback-restart.patch\n"
+        "0003-release-both-audio-gpios.patch\n")
+    print("Generated three patches and module sources; no live system changes.")
 
 
 if __name__ == "__main__":

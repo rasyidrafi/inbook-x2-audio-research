@@ -1,5 +1,10 @@
 # Hasil verifikasi — 22 Oktober 2026
 
+**Status update:** live hardware qualification failed. See
+[hardware test report](hardware-test-20261022.md). Do not install or hot-reload
+the candidates on a working machine. Instructions below describe the earlier
+research workflow, not an approved deployment procedure.
+
 ## Kandidat yang dibangun
 
 | Target kernel laptop | Compiler di build-host | Hasil |
