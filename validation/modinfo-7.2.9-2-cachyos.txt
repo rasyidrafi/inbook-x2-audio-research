@@ -1,0 +1,18 @@
+filename:       /home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos/snd-soc-sof_es8336.ko
+description:    ASoC Intel(R) SOF + ES8336 Machine driver
+license:        GPL
+import_ns:      SND_SOC_INTEL_HDA_DSP_COMMON
+version:        1.1.0-research
+name:           snd_soc_sof_es8336
+depends:        snd-soc-core,snd-soc-intel-hda-dsp-common,snd
+alias:          platform:sof-essx8336
+alias:          platform:adl_es83x6_c1_h02
+alias:          platform:rpl_es83x6_c1_h02
+alias:          platform:mtl_es83x6_c1_h02
+alias:          platform:arl_es83x6_c1_h02
+alias:          platform:ptl_es83x6_c1_h02
+alias:          platform:nvl_es83x6_c1_h02
+srcversion:     FAA0977EC4D5F65BCFFC719
+vermagic:       7.2.9-2-cachyos SMP preempt mod_unload 
+retpoline:      Y
+parm:           quirk:Board-specific quirk override (int)

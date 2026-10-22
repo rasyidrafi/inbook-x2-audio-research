@@ -1,0 +1,6 @@
+Cycle 1: exit=0 duration=2.11s 
+Cycle 2: exit=0 duration=2.11s 
+Cycle 3: exit=0 duration=2.04s 
+Cycle 4: exit=0 duration=2.04s 
+Cycle 5: exit=0 duration=2.06s 
+Cycle 6: exit=0 duration=2.05s 

@@ -1,0 +1,13 @@
+make: Entering directory '/home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos'
+make -C /home/build-user/work/inbook-x2-audio-research/build/headers/7.2.9-2-cachyos/build M=/home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos modules
+make[1]: Entering directory '/home/build-user/work/inbook-x2-audio-research/build/headers/7.2.9-2-cachyos/build'
+make[2]: Entering directory '/home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos'
+  CC [M]  sof_es8336.o
+  LD [M]  snd-soc-sof_es8336.o
+  MODPOST Module.symvers
+  CC [M]  snd-soc-sof_es8336.mod.o
+  LD [M]  snd-soc-sof_es8336.ko
+  BTF [M] snd-soc-sof_es8336.ko
+make[2]: Leaving directory '/home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos'
+make[1]: Leaving directory '/home/build-user/work/inbook-x2-audio-research/build/headers/7.2.9-2-cachyos/build'
+make: Leaving directory '/home/build-user/work/inbook-x2-audio-research/build/modules/7.2.9-2-cachyos'

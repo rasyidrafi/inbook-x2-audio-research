@@ -1,0 +1,7 @@
+{
+  "decompiled_functions": 179,
+  "decompiler_failures": 0,
+  "register_write_callsites": 223,
+  "constant_register_and_value_callsites": 132,
+  "warning": "Callsites are not runtime order, board applicability, or a safe initialization sequence."
+}

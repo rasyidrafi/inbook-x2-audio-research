@@ -1,0 +1,60 @@
+Subject: [PATCH] ASoC: Intel: sof_es8336: add Infinix EM_IC325 GPIO configuration
+
+Select both GPIOs for the exact Infinix board and make the secondary
+descriptor follow speaker power. Preserve the existing mapping order
+and module-parameter override. Other boards retain their polarity.
+Based on local GPIO/playback evidence and vendor configuration analysis.
+
+Research candidate; not submitted or hardware-qualified as a new release.
+
+---
+diff --git a/sound/soc/intel/boards/sof_es8336.c b/sound/soc/intel/boards/sof_es8336.c
+--- a/sound/soc/intel/boards/sof_es8336.c
++++ b/sound/soc/intel/boards/sof_es8336.c
+@@ -63,6 +63,7 @@
+ 	struct snd_soc_jack jack;
+ 	struct list_head hdmi_pcm_list;
+ 	bool speaker_en;
++	bool headphone_gpio_follows_speaker;
+ 	struct delayed_work pcm_pop_work;
+ };
+ 
+@@ -120,7 +121,9 @@
+ 	gpiod_set_value_cansleep(priv->gpio_speakers, priv->speaker_en);
+ 
+ 	if (quirk & SOF_ES8336_HEADPHONE_GPIO)
+-		gpiod_set_value_cansleep(priv->gpio_headphone, !priv->speaker_en);
++		gpiod_set_value_cansleep(priv->gpio_headphone,
++					 priv->headphone_gpio_follows_speaker ?
++					 priv->speaker_en : !priv->speaker_en);
+ 
+ }
+ 
+@@ -334,6 +337,15 @@
+  * if the topology file is modified as well.
+  */
+ static const struct dmi_system_id sof_es8336_quirk_table[] = {
++	{
++		.callback = sof_es8336_quirk_cb,
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "Infinix"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME,
++					"EM_IC325_200B_V1.0 20211012"),
++		},
++		.driver_data = (void *)SOF_ES8336_HEADPHONE_GPIO,
++	},
+ 	{
+ 		.callback = sof_es8336_quirk_cb,
+ 		.matches = {
+@@ -765,6 +777,11 @@
+ 		goto err_put_codec;
+ 	}
+ 
++	/* Both active-low descriptors follow speaker power on this board. */
++	priv->headphone_gpio_follows_speaker =
++		dmi_match(DMI_SYS_VENDOR, "Infinix") &&
++		dmi_match(DMI_BOARD_NAME, "EM_IC325_200B_V1.0 20211012");
++
+ 	INIT_LIST_HEAD(&priv->hdmi_pcm_list);
+ 	INIT_DELAYED_WORK(&priv->pcm_pop_work,
+ 				pcm_pop_work_events);

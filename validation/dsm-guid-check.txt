@@ -1,0 +1,13 @@
+Static check, 2026-10-22.
+Binary: inputs/windows/ESAuDriverTDMMode.sys
+Request builder: 0x14000f274, loads GUID from VA 0x140017340.
+PE section mapping was used to resolve RVA 0x17340 to file offset.
+GUID bytes: 04 0c 80 a9 16 e0 3e 34 41 f4 6b cc e7 0f 43 32
+Windows GUID notation: a9800c04-e016-343e-41f4-6bcce70f4332
+Firmware: inputs/firmware/ES8326-device.asl.txt, Arg0 buffer in _DSM.
+Firmware bytes exactly match the binary GUID.
+Firmware selector 0x5B returns One.
+Decompiler: 0x14000f274 maps selector 0x5B result to context+0x32b.
+Assembly: selector branch at 0x140010747, field store at 0x140010a7b.
+GPIO policy: 0x14000a214 tests context+0x32b at 0x14000a38f.
+This is static correspondence, not a live Windows request trace.

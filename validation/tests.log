@@ -1,0 +1,20 @@
+test_balanced_casts_and_nested_calls (test_analysis.EvidenceParsing.test_balanced_casts_and_nested_calls) ... ok
+test_board_section_does_not_leak_generic_defaults (test_analysis.EvidenceParsing.test_board_section_does_not_leak_generic_defaults) ... ok
+test_dynamic_values_are_not_guessed (test_analysis.EvidenceParsing.test_dynamic_values_are_not_guessed) ... ok
+test_truncated_call_rejected (test_analysis.EvidenceParsing.test_truncated_call_rejected) ... ok
+test_patch_series_reproduces_modern_candidate (test_patches.PatchSeries.test_patch_series_reproduces_modern_candidate) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.005s
+
+OK
+upstream-negative-control: 72 sequential transition cases passed; restart_fix=0 polarity_fix=0
+modern-candidate: 72 sequential transition cases passed; restart_fix=1 polarity_fix=1
+legacy-candidate: 72 sequential transition cases passed; restart_fix=1 polarity_fix=1
+{
+  "decompiled_functions": 179,
+  "decompiler_failures": 0,
+  "register_write_callsites": 223,
+  "constant_register_and_value_callsites": 132,
+  "warning": "Callsites are not runtime order, board applicability, or a safe initialization sequence."
+}

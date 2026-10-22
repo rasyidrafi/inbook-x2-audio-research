@@ -1,0 +1,25 @@
+# Private hardware/vendor inputs. Only GPL Linux references are publishable.
+inputs/*
+!inputs/linux-upstream/
+!inputs/linux-current/
+analysis/*
+!analysis/board-config.json
+!analysis/inventory-summary.json
+!analysis/input-sha256.txt
+validation/*.json
+build/
+artifacts/
+.tools/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.sys
+*.cat
+*.ko
+*.tar.gz
+*.zip

@@ -1,0 +1,29 @@
+Subject: [PATCH] ASoC: Intel: sof_es8336: restore Infinix amplifier on playback restart
+
+STOP mutes the amplifier without changing the DAPM state. A subsequent
+START can therefore leave playback running with the amplifier muted.
+Requeue the existing 70 ms GPIO work for playback START, RESUME and
+PAUSE_RELEASE while the speaker route is powered. Limit to the tested
+board; capture and other boards are unchanged. This ports the previously
+hardware-tested local 1.0.1 fix to the pinned upstream source.
+Link: https://github.com/thesofproject/linux/issues/5967
+
+Research candidate; not submitted or hardware-qualified as a new release.
+
+---
+diff --git a/sound/soc/intel/boards/sof_es8336.c b/sound/soc/intel/boards/sof_es8336.c
+--- a/sound/soc/intel/boards/sof_es8336.c
++++ b/sound/soc/intel/boards/sof_es8336.c
+@@ -137,6 +137,12 @@
+ 	case SNDRV_PCM_TRIGGER_START:
+ 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
+ 	case SNDRV_PCM_TRIGGER_RESUME:
++		/* STOP can mute the amp without cycling DAPM speaker power. */
++		if (priv->headphone_gpio_follows_speaker &&
++		    substream->stream == SNDRV_PCM_STREAM_PLAYBACK &&
++		    !priv->speaker_en)
++			queue_delayed_work(system_dfl_wq, &priv->pcm_pop_work,
++					   msecs_to_jiffies(70));
+ 		break;
+ 
+ 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:

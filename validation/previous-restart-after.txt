@@ -1,0 +1,61 @@
+buffer=8192 period=2048
+
+Initial start
+ gpio-130 (                    |headphone-enable    ) out hi ACTIVE LOW
+ gpio-145 (                    |speakers-enable     ) out hi ACTIVE LOW
+state: RUNNING
+owner_pid   : <redacted>
+trigger_time: 30318.645380966
+tstamp      : 0.000000000
+delay       : 944
+avail       : 7248
+avail_max   : 7248
+-----
+hw_ptr      : 7248
+appl_ptr    : 8192
+delay=944
+
+After stop/restart
+ gpio-130 (                    |headphone-enable    ) out hi ACTIVE LOW
+ gpio-145 (                    |speakers-enable     ) out hi ACTIVE LOW
+state: RUNNING
+owner_pid   : <redacted>
+trigger_time: 30318.808824358
+tstamp      : 0.000000000
+delay       : 896
+avail       : 7296
+avail_max   : 7296
+-----
+hw_ptr      : 7296
+appl_ptr    : 8192
+delay=896
+
+After stop/restart
+ gpio-130 (                    |headphone-enable    ) out hi ACTIVE LOW
+ gpio-145 (                    |speakers-enable     ) out hi ACTIVE LOW
+state: RUNNING
+owner_pid   : <redacted>
+trigger_time: 30318.971959566
+tstamp      : 0.000000000
+delay       : 848
+avail       : 7344
+avail_max   : 7344
+-----
+hw_ptr      : 7344
+appl_ptr    : 8192
+delay=896
+
+After stop/restart
+ gpio-130 (                    |headphone-enable    ) out hi ACTIVE LOW
+ gpio-145 (                    |speakers-enable     ) out hi ACTIVE LOW
+state: RUNNING
+owner_pid   : <redacted>
+trigger_time: 30319.136834481
+tstamp      : 0.000000000
+delay       : 896
+avail       : 7296
+avail_max   : 7296
+-----
+hw_ptr      : 7296
+appl_ptr    : 8192
+delay=896
